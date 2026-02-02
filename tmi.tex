@@ -1,0 +1,648 @@
+\documentclass[journal,twoside,web]{ieeecolor}
+% \usepackage{generic}
+\usepackage{tmi}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{balance}
+\usepackage[justification=centering]{caption}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\markboth{\journalname, VOL. XX, NO. XX, XXXX 2020}
+{Author \MakeLowercase{\textit{et al.}}: Preparation of Papers for IEEE TRANSACTIONS ON MEDICAL IMAGING}
+\begin{document}
+\title{Variational Network with Wavelet-based UNET in
+Accelerated MRI Reconstruction from Under Sampled K-space Data}
+
+% \author{Yasir Arafat Prodhan, Dr.Shaikh Anowarul Fattah
+% \thanks{Yasir Arafat Prodhan and Shaikh Anowarul Fattah are with the Department 
+% of Electrical and Electronic Engineering, Bangladesh University of Engineering 
+% and Technology, Dhaka, Bangladesh (e-mail: 1906191@eee.buet.ac.bd; fattah@eee.buet.ac.bd).}}
+
+\author{Yasir Arafat Prodhan, Dr. Shaikh Anowarul Fattah, \IEEEmembership{Member, IEEE}
+\thanks{Manuscript received dd, month, yyyy; revies on dd, month, yyyy}
+\thanks{Yasir Arafat Prodhan and Dr. Shaikh Anowarul Fattah are with the Department 
+of Electrical and Electronic Engineering, Bangladesh University of Engineering 
+and Technology, Dhaka, Bangladesh (e-mail: 1906191@eee.buet.ac.bd; fattah@eee.buet.ac.bd).}
+}
+% \thanks{Dr. Shaikh Anowarul Fattah is with the Department 
+% of Electrical and Electronic Engineering, Bangladesh University of Engineering 
+% and Technology, Dhaka, Bangladesh (e-mail: fattah@eee.buet.ac.bd).}}
+
+
+% \thanks{This paragraph of the first footnote will contain the date on which
+% you submitted your paper for review. It will also contain support information,
+% including sponsor and financial support acknowledgment. For example, 
+% ``This work was supported in part by the U.S. Department of Commerce under Grant BS123456.'' }
+% \thanks{The next few paragraphs should contain the authors' current affiliations,
+% including current address and e-mail. For example, F. A. Author is with the
+% National Institute of Standards and Technology, Boulder, CO 80305 USA (e-mail:author@boulder.nist.gov). }
+% \thanks{S. B. Author, Jr., was with Rice University, Houston, TX 77005 USA.
+% He is now with the Department of Physics, Colorado State University,
+% Fort Collins, CO 80523 USA (e-mail: author@lamar.colostate.edu).}
+% \thanks{T. C. Author is with the Electrical Engineering Department,
+% University of Colorado, Boulder, CO 80309 USA, on leave from the National
+% Research Institute for Metals, Tsukuba, Japan (e-mail: author@nrim.go.jp).}}
+
+\maketitle
+
+\begin{abstract}
+
+MRI (Magnetic Resonance Imaging) is a frequently used powerful diagnostic tool. This sophisticated technology requires long scan time which hinders its clinical utility. Traditional MRI scans are time consuming as they need to sample from dense k-space data. To solve this problem, under-sampling techniques like Compressed Sensing (CS), Parallel Imaging are used. Recently Deep Learning based techniques are making its way through the traditional approaches. Recent advancement in Deep Learning methods such as CNNs, GANs, Diffusion Models have shown promising results in high-quality MRI image reconstruction from under-sampled k-space data. Ongoing research seeks to further improve reconstruction speed, maintaining Image quality. In this work, we show a novel architecture built on Wavelet based CNN incorporating a Variational Network.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Variational Network, Wavelet-based CNN, MRI Reconstruction, Accelerated MRI, Deep Learning, Image Quality, SSIM, PSNR
+\end{IEEEkeywords}
+
+\section{Introduction}
+\label{sec:introduction}
+\IEEEPARstart{M}{agnetic} Resonance Imaging is an inverse imaging modality used in the clinical field. MRI gives more clear and high-quality images of different anatomy than other imaging techniques like Computed Tomography(CT) and Positron Emission Tomography (PET). But one downside of MRI is its acquisition time. To overcome this problem under-sampling MRI acquisition reconstruction approaches were developed. But it introduces numerous aliasing artefacts. Researchers have tried out many ways to produce high-quality images from undersampled k-space data. Accelerated MRI reconstruction has been a successful option for reducing scan time. \\
+
+Before deep learning approaches, traditional approaches like Parallel Imaging(PI), Compressed Sensing(CS) were in use. Sensitivity Encoding \textbf{SENSE}~\cite{sense} is a PI method that works in the image domain by utilizing coil-sensitivity maps. Generalized Auto-Calibration Line \textbf{GRAPPA}~\cite{grappa} is another PI technique which uses ACS(auto calibration line) to estimate GRAPPA kernel weights to fill the missing data in under-sampled k-space. Compressed Sensing[3] is a broadly accepted reconstruction approach which relies on sparsity representation in another transformation domain. CS works better with 3D and 4D data rather than 2D data.\\
+
+General Deep Learning based reconstruction methods have bloomed in recent years. Data driven techniques require huge training data. These data-driven methods do their training in different domains i.e. (i)K-space domain, (ii)Image domain, (iii)Cross-domain. De-aliasing GAN \textbf{DAGAN}~\cite{dagan} with a U-Net based generator is an image domain reconstruction method. Enhanced Recursive residual Network \textbf{ERRN}~\cite{errn} is another image domain reconstruction method which employs ResNet. Other networks like \textbf{DeepComplex}~\cite{deepcomplex} MRI uses relation between real and imaginary values of complex images. \textbf{RefineGAN}~\cite{refinegan} implements deeper networks than others with cycle consistency loss for accurate reconstruction. Reconstruction in k-space is another approach. It can be k-space to image, k-space to k-space. Robust Artificial Neural Network \textbf{RAKI}~\cite{raki} works in the k-space domain which interpolates the undersampled data in k-space. \\
+
+Other than data-driven approaches, model-driven reconstruction methods are also being proposed. Alternating Direction method of Multipliers \textbf{ADMM}~\cite{admm} is one of the pioneers in model-driven methods. Following this Model-based deep learning prior \textbf{MoDL}~\cite{modl} uses redundant information for better results.
+\\
+
+Iterative model-based methods like \textbf{variational network}~\cite{varnet} implements Fields of Experts model, a generalization of total variation as a regularization term.\textbf{E2E-varnet}~\cite{e2evarnet} uses Unet instead of gradients of the Fields of Experts model. Very recent Generative Models like \textbf{GANs}[11], Diffusion Models \textbf{(score-based Diffusion)}~\cite{scorediff} and \textbf{Flow-Matching}~\cite{flowmatch} are also making their way in this particular reconstruction task.\\
+
+All in all, advancement in the accelerated MRI reconstruction techniques has improved the scan time and the image quality. For instance, the history of the field started from parallel imaging, where the imaging was done many times in a row within a single session, straight to the modern ones incorporating deep learning which makes MRI much quicker and precise. The research calls for more innovations to be done taking to account the speed, correctness, and versatility of the methods. As these techniques get developed further, they promise to enhance the efficiency and availability of the MRI which will be good for the patients and providers of healthcare services in the end.
+
+\section{Problem Formulation}
+MR Imaging is an inverse process where the images of different anatomy are obtained in the frequency domain commonly known as K-Space in the medical community. Unlike spatially resolved images captured using usual camera MR scanner works in a completely different way. MR scanner images a patient anatomy in the frequency domain, placing measuring instruments called receiver coil in the proximity to the area to be imaged. In modern MR scanner measurements are taken through multiple receiver coils. The imaging model of the MR scanner can be formulated as:
+
+\begin{equation}
+    K_i = F(S_ix^*) + z_i, \quad i = 1,2,....N
+\end{equation}
+where $x^* \in \mathbb{C} $ is the spatial domain image of the region of interest, $S_i$ is a diagonal matrix representing the $ith$ receiver coil sensitivity, $F$ is a multi-dimensional Fourier Transform and $z_i$ represents the receiver coil noise. \\
+The data acquisition time of a MRI is limited by the number of k-space samples obtained by the MR scanner. As the time is proportional to the number of samples measured, we can accelerate the acquisition time by under-sampling the k-space data, $\quad \tilde{k}_i = \mathbf{M} k_i, \quad i = 1, \dots, N$, where $\mathbb{M}$ is the binary mask, holding 0 values for under-sampled region. Our goal is to reconstruct the spatial domain complex valued ground truth image $x^*$ form the under-sampled k-space data $\tilde{K_i}$. But as we have less observations than variables it is not generally possible to reconstruct the ground truth image. Therefore we need prior knowledge on the anatomy of the object to be imaged. This prior knowledge is incorporated in the form of sparsity in the transform domain. This inverse problem can be formulated as:
+\begin{align}
+	\hat{x} &= \frac{1}{2}\arg\min_{x} \left\| MF(S_ix) - K_i \right\|^2 + \lambda \mathcal{R}(x), \notag \\
+            &= \frac{1}{2}\arg\min_{x} \left\| T(x) - \tilde{K} \right\|^2 + \lambda \mathcal{R}(x)
+\end{align}
+where $T$ is a linear forward operator consisting of multiplication by sensitivity maps followed by Fourier transform then applying the under sampling mask. $\tilde{K}$ is the stacked k-space data from all the coil. $R$ is a regularization that puts constraints on sparsity in the transform domain, $\lambda$ is a hyper-parameter which controls the balance between the first term and the second term. This equation now can be solved in a iterative process using gradient descent. The unrolled iterative method can be modeled as:
+\begin{equation}
+	\mathbf{x}^{t+1} = \mathbf{x}^{t} - \eta^t \left[ T^* \left( T(\mathbf{x}) - \tilde{\mathbf{k}} \right)\right] + \lambda\mathcal{G}(x^t)
+\end{equation}
+where $\mathcal{G}$ is the gradient of the regularization function and $\eta^t$ is the learning rate of the Tth step. Here the next step is predicted iteratively from the the current step. The first term of the equation is \textbf{Data Consistency} (DC) \& the second term is a CNN based \textbf{Regularization Function} unlike any predefined regularization function. As our model deals with the k-space data in the intermediate steps the above equation can be written as:
+\begin{equation}
+	\mathbf{K}^{t+1} = \mathbf{K}^{t} - \eta^t \left[ M(\mathbf{K^t} - \tilde{\mathbf{k}}) \right] + \lambda\mathcal{G}(K^t)
+\end{equation}
+This equation defines our model, where the first term is Data Consistency Block (\textbf{DC}) \& the second term is Refinement Block (\textbf{RB}).
+
+
+\section{Proposed Model Architecture}
+    Accelerated MRI reconstruction is an ill-posed inverse problem. Over the time period researchers used different model architectures. At the beginning CNN based deep networks like U-Net dominated this task. In a very short time with the advancement of new architectures like Vision-Transformers, Auto-Encoders, Generative Models traditional architectures were falling behind in reconstruction quality, but model complexity was increasing in parallel with reconstruction capability. Besides, different novel approaches like training in the k-space domain or cross-domain (k-space \& image) were coming into light.\\
+
+However, our model incorporates Variational Network and Wavelet based CNN layers for less complexity and more robustness. Traditional CNNs apply fixed size kernels to extract features from input data. These filters capture spatial hierarchies of the Image such as edges, textures, patterns through multiple layers of convolution patterns and make them ideal for analysing visual data. But unfortunately, they often struggle to preserve fine details and are sensitive to small variations in the image. But wavelets inherently provide multiscale representations by decomposing the input into different frequency bands (Low and High). This allows the model to capture both global and local features more effectively. In wavelet based CNNs we use wavelet decomposition for down sampling layer (max pooling in standard CNN) which is more robust at preserving detail. Wavelet transforms are better suited for sparse data. As they have the ability to capture sparse representations, are more resilient to noisy data and can retain important signal features specially when noise occurs in the frequency domain. \\
+
+\begin{figure*}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{figures/WCNN.png}
+	\caption{Wavelet Based UNET}
+	\label{•}
+\end{figure*}
+
+
+\begin{figure*}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{figures/Model.png}
+	\caption{Model Architecture}
+	\label{•}
+\end{figure*}
+
+
+\begin{figure*}[ht]
+	\includegraphics[width=\textwidth]{figures/Refinement.png}
+	\caption{Refinement Block}
+	\label{•}
+\end{figure*}
+
+\begin{figure*}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{figures/SME.png}
+	\caption{Sensitivity Estimation Block}
+	\label{•}
+\end{figure*}
+
+
+\begin{figure*}[ht]
+	\centering
+	\includegraphics[width=\columnwidth]{figures/DC.png}
+	\caption{Data Consistency Block}
+	\label{•}
+\end{figure*}
+
+Variational Network is primarily a cascade of VarNet Blocks. A single VarNet block consists of Data Consistency (DC) module, Refinement (R) module and Sensitivity Map Estimation (SME) module. \\
+
+\textbf{Data Consistency Module}: Data Consistency module computes the correction map that brings the intermediate k-space closer to the measured k-space values. It interpolates missing data in the under sampled region through reconstruction while maintaining consistency where data was acquired. \\
+
+\textbf{Refinement Module}: The Refinement module maps multi-coil k-space data into one image, applies a UNet then back to multi-coil k-space data. This module improves image quality by ensuring better separation of coil sensitivity. \\
+
+\textbf{Sensitivity Map Estimation} : It estimates the sensitivity maps used in the refinement module. \\
+
+In the Refinement module \& SME module we use UNet architecture for capturing both the local and global information of the intermediate reconstructed image. Here in the CNN layers we incorporate Wavelet decomposition in the pooling layers as they are able to retain important information from the previous layers. This allows Wavelet based CNNs to capture both spatial and frequency information at multi-scales.
+
+\section{Dataset}
+
+In our experiment we use two publicly available Benchmark dataset, fastMRI and M4Raw. They both contain raw k-space complex data with their reconstructed images. fastMRI has single-coil and multi-coil volumes of Knee and multi-coil volumes of Brain. We conduct our experiment on the \textbf{fastMRI : Single-Coil Knee \& Multi-Coil Knee} MRI and \textbf{M4Raw : Multi-Coil Brain} data. Volume distribution of the training and validation dataset are mentioned below:
+
+\renewcommand{\arraystretch}{1.5}
+%\setlength{\tabcolsep}{10pt}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Dataset} & \textbf{Anatomy} & \textbf{Modality} & \textbf{Train Vol.} & \textbf{Validation Vol.} \\ \hline
+\multirow{4}{*}{fastMRI~\cite{fastmri}} & \multirow{2}{*}{Knee (Single-coil)} & PD & 484 & 100 \\ \cline{3-5} 
+ &  & PDFS & 489 & 99 \\ \cline{2-5} 
+ & \multirow{2}{*}{Knee (Multi-coil)} & PD & 158 & 29 \\ \cline{3-5} 
+ &  & PDFS & 170 & 31 \\ \hline
+\multirow{3}{*}{M4Raw~\cite{m4raw}} & \multirow{3}{*}{Brain (Multi-coil)} & AXT1 & 308 & 76 \\ \cline{3-5} 
+ &  & AX FLAIR & 207 & 49 \\ \cline{3-5} 
+ &  & AXT2 & 304 & 80 \\ \hline
+\end{tabular}
+\captionsetup{justification=centering, skip=10pt}
+\caption{ Training \& Validation volumes from fastMRI and M4Raw}
+\label{tab:dataset_info}
+\end{table}
+
+The fastMRI \& M4Raw dataset contains 3 types of data.
+
+\begin{enumerate}
+    \item \textbf{Raw Multi-Coil K-space data} : Complex Valued multi-coil k-space data. These are the unprocessed MRI acquisition raw data.
+    
+    \item \textbf{Emulated Single-Coil K-space data} : Multi-coil k-space data are converted to a single coil to mimic single-coil acquisition.
+    \item \textbf{Ground-Truth} : Real-valued spatial image calculated from fully sampled raw k-space data. There are two types of ground-truth images - \textbf{reconstruction\_rss} for multi-coil reconstruction \& \textbf{reconstruction\_esc} for single-coil reconstruction.
+\end{enumerate}
+
+The datasets follow the ISMRMRD vendor-neutral format for storing data in a .h5 extension container file. Each volume has 3 keys.
+
+\begin{enumerate}
+    \item \textbf{ismrmrd\_header} : A xml string containing the metadata of the file.
+    
+    \item \textbf{kspace} : raw k-space data.
+    
+    \item \textbf{reconstruction\_rss / reconstruction\_esc} : Reconstructed image (ground-truth)
+\end{enumerate} \
+
+Anatomy knee has 2 sequences Proton-Density \textbf{PD} \& Proton-Density Fat Suppression\textbf{PDFS}. Each volume has on average 36 slices (15 coils for multi-coil) and a total of 34,742 slices. M4raw has 3 acquisition sequences, \textbf{T1}- weighted, \textbf{T2}-weighted, and \textbf{FLAIR} images. Each volumes of M4Raw has 18 (4 coils) slices each and a total of 18,432 slices.
+
+
+\section{Methodology}
+\subsection{Data Preprocessing}
+M4Raw and fastMRI contain raw k-space data which has to be pre-processed for training. The k-space data in the files are fully-sampled and needs to be under-sampled so that it can simulate physically realizable accelerated MRI acquisition by a machine. Therefore we need to create a under-sampled mask and then multiply it with the k-space data to generate the under-sampled k-space.
+
+\begin{equation*}
+K'_i = MK_i
+\end{equation*}
+where $K_i$ denotes the fully-sampled k-space matrix from ith coil, $M$ is the binary mask and $K'_i$ is the under-sampled k-space matrix. \\
+
+In k-space data there are typically three regions. Low frequency region, Meduim frequency region \& high frequency region with dc components. A portion of the low frequency region is called the Autocalibration Signal \textbf{ACS} lines. Undersampling masks are generally created by including a fraction of the ACS lines. For acceleration factor \textbf{$4$} the sampled ACS lines are $8\%$ of the total k-space lines and for acceleartion factor 2 it is $11\%$. The remaining k-space lines are sampled uniformly at random from the high frequency region. In our experiment we use acceleration factor 4 \& 2 for creating the under-sampling mask. \\
+
+We use the masks to under-sample the fully-sampled k-space. K-space in \textbf{fastMRI knee}  is a matrix of size \textbf{$S*H*W$} (single-coil) \& \textbf{$S*C*H*W$}  (multi-coil) where
+\begin{equation*}
+    \begin{aligned}
+    S &= \text{slice} \quad
+    C &= \text{coil x 15} \quad
+    H &= 640 \quad
+    W &= 388
+    \end{aligned}
+\end{equation*}
+
+and in \textbf{M4Raw brain} 
+\begin{equation*}
+    \begin{aligned}
+    S &= \text{slice} \quad
+    C &= \text{coil x 4} \quad
+    H &= 256 \quad
+    W &= 256
+    \end{aligned}
+\end{equation*}
+We center crop the knee k-space into a matrix size of $slice*coil*256*256$ and brain k-space into $slice*coil*200*200$ for training.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{figures/kspace undersampling.png}
+\caption{Illustration of the undersampling process in MRI reconstruction. The fully sampled k-space data is undersampled to accelerate acquisition.}
+\end{figure}
+
+\subsection{Training Strategy}
+In this study, we conducted extensive experiments on knee and brain MRI datasets, varying the acceleration factor and undersampling mask while keeping the model architecture constant. Our goal was to systematically evaluate different deep learning-based MRI reconstruction approaches and iteratively refine our model to achieve optimal performance.
+
+Each model was trained for 30 epochs with a batch size of 1 volume. Due to GPU memory constraints, we implemented gradient accumulation to effectively simulate larger batch sizes. The accumulation was performed:
+\begin{itemize}
+    \item After every 2 slices for multi-coil MRI data.
+    \item After every 8 slices for single-coil MRI data.
+\end{itemize}
+For optimization, we used the Adam optimizer with an initial learning rate of: $\eta  = 5 \times 10^{-4}$. A learning rate scheduler was applied after every 10 epochs to gradually decrease the learning rate, improving stability and convergence. The training was conducted on \textbf{Kaggle}, an online Google subsidiary platform that provides cloud-based GPU access for machine learning and deep learning projects. We utilized the \textbf{NVIDIA Tesla P100 GPU}, which offers 16GB of memory and is well-suited for deep learning tasks involving large datasets.
+
+\subsection{Loss Function}
+
+\subsubsection{L1 \& L2 Norm}
+In encoder-decoder based image reconstruction L2 loss had been a go to loss function. L2 calculates the squared difference between the target pixel and the reconstructed pixel. It is easy to implement but had it's side effects. L2 is prone to outliers. The squared difference leads to larger errors if the dataset has outliers. Thus it creates blurry image. \\
+L1 calculates the mean absolute errors between the target and prediction. As it is less prone to outliers, it creates less blurry image. Hence L1 is more useful than L2 loss.
+
+\subsubsection{SSIM\_Loss}
+To retain the perceived image quality of the reconstructed image SSIM loss function is a good choice. SSIM uses a sliding window $(7 \times 7)$ for capturing the local region information around the target pixel. SSIM loss function compares between the local area of the target pixel between the reconstructed image and the target image. SSIM loss function is defined as 
+\begin{equation*}
+\begin{aligned}
+SSIM(x, y) = l(x, y)^\alpha  c(x, y)^\beta  s(x, y)^\gamma
+\end{aligned}
+\end{equation*}
+where x, y are image patches, $l,c,s$ are luminance, contrast and structure comparison functions \& $\alpha \ , \beta \ , \gamma$ are the weights. 
+
+\subsubsection{Phase\_Loss}
+As we are dealing with complex-valued MRI data which has both magnitude and phase, it is better to take into consideration the phase loss along with the magnitude loss. Phase loss penalizes the model when the reconstructed image pixels are out of phase from the original image. Phase loss is defined as 
+
+\begin{equation*}
+\begin{aligned}
+Ploss(x, y) = 1 - \frac{[\Re(x) \cdot \Re(y) + \Im(x) \cdot \Im(y)]}{\sqrt{\Re(x)^2 + \Im(x)^2}.\sqrt{\Re(y)^2 + \Im(y)^2}}
+\end{aligned}
+\end{equation*}
+
+\subsection{Evaluation Metrics}
+We evaluate our model on the validation split based on two most used metric in reconstruction task - Structural Similarity (SSIM) \& Peak-Signal-to-Noise ratio (PSNR).
+
+
+\subsubsection{PSNR}
+The \textit{peak-signal-to-noise ratio}, PSNR is a ratio between the maximum possible power of a signal and the power of the distorting noise that affects its representation. As signals have a wide range of power PSNR is measured in a logarithmic scale [dB].
+
+\begin{equation*}
+    \begin{aligned}
+    PSNR(y', y) &= 10 \times \log_{10}\left[ \frac{max(y)^2}{MSE(y', y)} \right] \\
+    \end{aligned}
+\end{equation*}
+
+\subsubsection{SSIM}
+When comparing images Mean Squared Error \textbf{MSE} may be easy to implement but doesn't provide any information regarding perceived similarity. Human eye all about perception. Hence Structural Similarity Index Measure \textbf{(SSIM)} is a well received metric for comparing two images. SSIM is a full reference metric, in other words the measurement of image quality is based on a distortion free reference image in our case the ground-truth image.
+
+\begin{equation}
+    \begin{aligned}
+    SSIM(x, y) = \frac{(2\mu_x \mu_y + c_1)(2\sigma_{xy} + c_2)}    {(\mu_x^2 + \mu_y^2 + c_1)(\sigma_x^2+\sigma_y^2+c_2)}
+    \end{aligned}
+\end{equation}
+where
+\begin{equation*}
+    \begin{array}{rl}
+        \mu_x &= \text{average of x} \\
+        \mu_y &= \text{average of y} \\
+        \sigma_x &= \text{variance of x} \\
+        \sigma_y &= \text{variance of y} \\
+        c_1, c_2 &\text{ are two variables to stabilize the weak division.}
+    \end{array}
+\end{equation*}
+
+
+\section{Results}
+The proposed VarNet + W-UNET model consistently outperforms traditional CNN-based methods and state-of-the-art (SOTA) approaches across multiple datasets and acceleration factors.  
+
+\textbf{fastMRI Dataset}: 
+For the single-coil knee dataset, our model achieves an SSIM of 0.6627 and PSNR of 30.96 dB for PDFS, surpassing methods like MTrans and rsGAN. For the multi-coil knee dataset, our approach achieves an SSIM of 0.903 and PSNR of 34.72 dB, significantly outperforming traditional compressed sensing and deep learning models.  
+
+\textbf{M4Raw Dataset}: 
+In the brain multi-coil dataset, our method outperforms GRAPPA and standard VarNet in all modalities (AX FLAIR, AX T2, AX T1). Notably, for AX T1, VarNet + W-UNET achieves the highest SSIM of 0.894 and PSNR of 34.88 dB, improving upon the baseline VarNet results.  
+
+\subsection{Dataset: fastMRI}
+\subsubsection{Ours vs. Traditional CNN}
+\leavevmode
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        Model & Modality & \multicolumn{2}{c|}{Metric (*AF = 4)} \\
+        \cline{3-4}
+         & & SSIM & PSNR \\
+        \hline
+        UNET & \multirow{4}{*}{PDFS} & 0.458 & 24.67 \\
+        \cline{1-1} \cline{3-4}
+        TransUnet & & 0.4883 & 25.11 \\
+        \cline{1-1} \cline{3-4}
+        W-UNET & & 0.5377 & 28.22 \\
+        \cline{1-1} \cline{3-4}
+        \textbf{VarNet + W-UNET (ours)} & & \textbf{0.6627} & \textbf{30.96} \\
+        \hline
+        UNET & \multirow{4}{*} {PD} & 0.673 & 24.924 \\
+        \cline{1-1} \cline{3-4}
+        TransUnet &  & 0.7043 & 25.37 \\
+        \cline{1-1} \cline{3-4}
+        W-UNET & & 0.7561 & 28.468 \\
+        \cline{1-1} \cline{3-4}
+        \textbf{VarNet + W-UNET (ours)} & & \textbf{0.85} & \textbf{31.22} \\
+        \hline
+        \end{tabular}
+    \captionsetup{justification=centering, skip=10pt}
+    \caption{Comparison of different methods with SSIM and PSNR metrics at Acceleration Factor(AF) = 4}
+    \label{tab:method-comparison}
+\end{table} 
+
+% \twocolumn
+\subsubsection{Ours vs. SOTA}
+\leavevmode
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        \multirow{2}{*}{Method} & \multirow{2}{*}{Modality} & \multicolumn{2}{c|}{Metric (AF = 4)} \\
+        \cline{3-4}
+        & & SSIM & PSNR \\
+        \hline
+        Zero-filling &  \multirow{13}{*} {PDFS} & 0.434 & 23.2 \\
+        \cline{1-1} \cline{3-4}
+        CS~\cite{cs} & & 0.5736 & 29.54 \\
+        \cline{1-1} \cline{3-4}
+        LORAKS~\cite{loraks} & & 0.543 & 25.8 \\
+        \cline{1-1} \cline{3-4}
+        UNET~\cite{unet} & & 0.578 & 27.8 \\
+        \cline{1-1} \cline{3-4}
+        OUCR~\cite{oucr} & & 0.602 & 28.5 \\
+        \cline{1-1} \cline{3-4}
+        Diffrecon~\cite{diffrecon} & & 0.608 & 28.6 \\
+        \cline{1-1} \cline{3-4}
+        TC-DiffRecon~\cite{tcdiffrecon} & & 0.503 & 26.5 \\
+        \cline{1-1} \cline{3-4}
+        HFS-SDE~\cite{hfssde} & & 0.503 & 26.5 \\
+        \cline{1-1} \cline{3-4}
+        SMSflow~\cite{flowmatch} & & 0.605 & 28.8 \\
+        \cline{1-1} \cline{3-4}
+        Transmed~\cite{transmed} & & 0.62 & 28.8 \\
+        \cline{1-1} \cline{3-4}
+        rsGAN~\cite{rsgan} & & 0.628 & 30.1 \\
+        \cline{1-1} \cline{3-4}
+        MTrans~\cite{mtrans} & & 0.632 & 30.5 \\
+        \cline{1-1} \cline{3-4}
+        \textbf{VarNet + W-UNET (ours)} &  & \textbf{0.6627} & \textbf{30.96} \\
+        
+        \hline
+        TV~\cite{fastmri} & \multirow{5}{*} {PD} & 0.636 & 27.13 \\
+        \cline{1-1} \cline{3-4}
+        % Supervised-UNet~\cite{unet} & & 0.81 & \textbf{33.78} \\
+        % \cline{1-1} \cline{3-4}
+        DuDoRNet~\cite{dudornet} & & 0.793 & 30.42 \\
+        \cline{1-1} \cline{3-4}
+        Score-based Diff. Model~\cite{scorediff} & & 0.812 & 31.95 \\
+        \cline{1-1} \cline{3-4}
+        \textbf{VarNet + W-UNET (ours)} &  & \textbf{0.85} & \textbf{31.22} \\
+        \hline
+    \end{tabular}
+    \caption{fastMRI: Knee Single-Coil}
+    \label{tab:fastmri-knee-single}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \multirow{2}{*}{Method} & \multicolumn{2}{c|}{Metric (AF = 4)} \\
+        \cline{2-3}
+        & SSIM & PSNR \\
+        \hline
+        TV~\cite{fastmri} & 0.693 & 32.10 \\
+        \hline
+        VarNet~\cite{varnet} & 0.818 & 32.97 \\
+        \hline
+        Score-based Diff. Model~\cite{scorediff} & 0.857 & 33.25 \\
+        \hline
+        \textbf{VarNet + W-UNET (ours)} & \textbf{0.903} & \textbf{34.72} \\
+        \hline      
+    \end{tabular}
+    \caption{fastMRI: Knee Multi-Coil}
+    \label{tab:fastmri-knee-multi}
+\end{table}
+
+
+\subsection{Dataset: M4Raw}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        \multirow{2}{*}{Method} & \multirow{2}{*}{Modality} & \multicolumn{2}{c|}{Metric (AF = 2)} \\
+        \cline{3-4}
+        & & SSIM & PSNR \\
+        \hline
+        GRAPPA~\cite{grappa} &  \multirow{3}{*} {AX FLAIR} & 0.708 & 28.52 \\
+        \cline{1-1} \cline{3-4}
+        VarNet~\cite{varnet} & & 0.851 & 34.21 \\
+        \cline{1-1} \cline{3-4}
+        \textbf{VarNet + W-UNET (ours)} &  & \textbf{0.857} & \textbf{32.47} \\
+        \hline
+        GRAPPA~\cite{grappa} &  \multirow{3}{*} {AX T2} & 0.72 & 28.70 \\
+        \cline{1-1} \cline{3-4}
+        VarNet~\cite{varnet} & & 0.843 & 33.87 \\
+        \cline{1-1} \cline{3-4}
+        \textbf{VarNet + W-UNET (ours)} &  & \textbf{0.862} & \textbf{32.60} \\
+        \hline
+        GRAPPA~\cite{grappa} &  \multirow{3}{*} {AX T1} & 0.743 & 30.71 \\
+        \cline{1-1} \cline{3-4}
+        VarNet~\cite{varnet} & & 0.888 & 35.71 \\
+        \cline{1-1} \cline{3-4}
+        \textbf{VarNet + W-UNET (ours)} &  & \textbf{0.894} & \textbf{34.88} \\
+        \hline        
+    \end{tabular}
+    \caption{M4Raw: Brain Multi-Coil}
+    \label{tab:M4Raw-comparison}
+\end{table}
+
+% These findings highlight the effectiveness of integrating wavelet-based CNNs into Variational Networks for accelerated MRI reconstruction, demonstrating superior structural similarity and image quality across diverse datasets.
+The experiment results indicate the superiority of \textbf{VarNet + W-UNET} for rapid MRI reconstruction on different datasets. Our method consistently performs better than baseline CNN-based methods and state-of-the-art methods with higher SSIM and PSNR scores. Structural detail preservation and noise removal are enhanced using wavelet-based CNNs, leading to higher quality images. These findings indicate the efficacy of our method in accelerating rapid and precise MRI reconstruction, paving the way for future advances in medical imaging.
+
+
+
+\section{Ablation Study:Impact of Key Components}
+In this section, we present a series of ablation studies to understand the individual contributions of different blocks and methods to the overall model performance. These experiments help us identify the critical components that enhance the reconstruction quality of our proposed Variational Network with Wavelet-based UNET (W-UNET).
+
+\subsection{Effect of the Data Consistency Block}
+
+The Data Consistency (DC) block plays a crucial role in ensuring that the reconstructed images remain faithful to the acquired k-space data. To evaluate its importance, we conducted experiments with and without the DC block. Table \ref{tab:dc_block} summarizes the results for both knee and brain MRI datasets. 
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+         \hline
+         \multirow{2}{*}{Anatomy} & \multirow{2}{*}{Modality} & \multicolumn{2}{c|}{without DC} & \multicolumn{2}{c|}{with DC} \\
+         \cline{3-6}
+         & & SSIM & PSNR & SSIM & PSNR \\ 
+         \hline
+         knee multi coil & PD & 0.78 & 27.47 & 0.903 & 34.72 \\ 
+         \hline
+         \multirow{3}{*}{Brain multi coil} & AX FLAIR & 0.747 & 28.05 & 0.857 & 32.47 \\
+         \cline{2-6}
+         & AX T1 & 0.824 & 31.89 & 0.894 & 34.88 \\
+         \cline{2-6}
+         & AX T2 & 0.83 & 31.18 & 0.862 & 32.60\\
+         \hline
+    \end{tabular}
+    \caption{Performance comparison with and without the Data Consistency (DC) block.}
+    \label{tab:dc_block}
+\end{table}
+
+As shown in Table \ref{tab:dc_block}, removing the DC block led to a significant drop in performance. For example, in the knee multi-coil dataset, the PSNR decreased from 34.72 to 27.47, and the SSIM dropped from 0.903 to 0.78. Similar trends were observed for the brain multi-coil dataset, confirming the essential role of the DC block in preserving the fidelity of the reconstructed images.
+
+\subsection{Effect of Wavelet-based UNET in the Refinement Block}
+
+The Refinement Block is responsible for improving the quality of the reconstructed images by refining the intermediate outputs. To evaluate the impact of using a Wavelet-based UNET (W-UNET) instead of a traditional CNN in this block, we compared the performance of the two architectures. Table \ref{tab:wcnn_vs_unet} presents the results for both single-coil and multi-coil datasets.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+         \hline
+         \multirow{2}{*}{Dataset} & \multirow{2}{*}{Modality} & \multicolumn{2}{c|}{VarNet + UNET} & \multicolumn{2}{c|}{VarNet + W-UNET} \\
+         \cline{3-6}
+         & & SSIM & PSNR & SSIM & PSNR \\
+         \hline
+         \multirow{2}{*}{knee single coil} & PD & 0.802 & 30.03 & 0.85 & 31.22 \\
+         \cline{2-6}
+         & PDFS & 0.654 & 28.17 & 0.6627 & 30.96 \\
+         \hline
+         knee multi coil & PD & 0.887 & 33.22 & 0.903 & 34.72 \\
+         \hline
+         \multirow{3}{*}{Brain multi coil} & AX FLAIR & 0.822 & 31.75 & 0.857 & 32.47 \\
+         \cline{2-6}
+         & AX T1 & 0.859 & 33.64 & 0.894 & 34.88 \\
+         \cline{2-6}
+         & AX T2 & 0.827 & 31.14 & 0.862 & 32.6\\
+         \hline
+    \end{tabular}
+    \caption{Performance comparison between UNET and Wavelet-based UNET (W-UNET) in the Refinement Block.}
+    \label{tab:wcnn_vs_unet}
+\end{table}
+
+From Table \ref{tab:wcnn_vs_unet}, the W-UNET consistently outperformed the traditional UNet across all datasets. For example, in the knee multi-coil dataset, W-UNET achieved an SSIM of \textbf{0.903} and PSNR of \textbf{34.72}, compared to \textbf{0.887} and \textbf{33.22} for UNet. Similarly, in the brain multi-coil AX T1 modality, W-UNET improved SSIM from \textbf{0.859} to \textbf{0.894} and PSNR from \textbf{33.64} to \textbf{34.88}, demonstrating its effectiveness in capturing high-frequency details and enhancing reconstruction quality.
+
+\subsection{Summary of Findings}
+
+The ablation studies demonstrate the critical contributions of the Data Consistency block and the Wavelet-based UNET in the Refinement Block to the overall performance of the proposed model. The DC block ensures fidelity to the acquired k-space data, while the W-UNET enhances the reconstruction quality by effectively capturing high-frequency details.
+
+\begin{figure*}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{figures/knee_single_result.png}
+	\caption{Illustrative Comparison of fastMRI knee Single-Coil MRI Reconstruction (x4 Acceleration Factor)}
+	\label{•}
+\end{figure*}
+
+\begin{figure*}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{figures/knee_multi_result.png}
+	\caption{Illustrative Comparison of fastMRI knee Single-Coil MRI Reconstruction (x4 Acceleration Factor)}
+	\label{•}
+\end{figure*}
+
+\begin{figure*}[ht]
+	\centering
+	\includegraphics[width=\textwidth]{figures/brain_result.png}
+	\caption{Illustrative Comparison of fastMRI knee Single-Coil MRI Reconstruction (x4 Acceleration Factor)}
+	\label{•}
+\end{figure*}
+
+\clearpage
+\balance
+
+\begin{thebibliography}{00}
+
+\bibitem{sense} 
+Pruessmann KP, Weiger M, Scheidegger MB, Boesiger P. SENSE: sensitivity encoding for fast MRI. Magn Reson Med. 1999 Nov;42(5):952-62. PMID: 10542355.
+
+\bibitem{grappa} 
+Griswold MA, Jakob PM, Heidemann RM, Nittka M, Jellus V, Wang J, Kiefer B, Haase A. Generalized autocalibrating partially parallel acquisitions (GRAPPA). Magn Reson Med. 2002 Jun;47(6):1202-10. doi: 10.1002/mrm.10171. PMID: 12111967.
+
+\bibitem{dagan} 
+Yang G, Yu S, Dong H, Slabaugh G, Dragotti PL, Ye X, Liu F, Arridge S, Keegan J, Guo Y, Firmin D, Keegan J, Slabaugh G, Arridge S, Ye X, Guo Y, Yu S, Liu F, Firmin D, Dragotti PL, Yang G, Dong H. DAGAN: Deep De-Aliasing Generative Adversarial Networks for Fast Compressed Sensing MRI Reconstruction. IEEE Trans Med Imaging. 2018 Jun;37(6):1310-1321. doi: 10.1109/TMI.2017.2785879. PMID: 29870361. 
+
+
+\bibitem{errn} 
+Bao L, Ye F, Cai C, Wu J, Zeng K, van Zijl PCM, Chen Z. Undersampled MR image reconstruction using an enhanced recursive residual network. J Magn Reson. 2019 Aug;305:232-246. doi: 10.1016/j.jmr.2019.07.020. Epub 2019 Jul 9. PMID: 31323504.
+
+
+\bibitem{deepcomplex} 
+Wang S, Cheng H, Ying L, Xiao T, Ke Z, Zheng H, Liang D. DeepcomplexMRI: Exploiting deep residual network for fast parallel MR imaging with complex convolution. Magn Reson Imaging. 2020 May;68:136-147. doi: 10.1016/j.mri.2020.02.002. Epub 2020 Feb 8. PMID: 32045635.
+
+
+\bibitem{refinegan} 
+T. M. Quan, T. Nguyen-Duc and W. -K. Jeong, "Compressed Sensing MRI Reconstruction Using a Generative Adversarial Network With a Cyclic Loss," in IEEE Transactions on Medical Imaging, vol. 37, no. 6, pp. 1488-1497, June 2018, doi: 10.1109/TMI.2018.2820120. keywords: {Image reconstruction;Magnetic resonance imaging;Machine learning;Gallium nitride;Training;Image quality;Databases;Compressed sensing;MRI;GAN;DiscoGAN;CycleGAN},
+
+\bibitem{raki}
+Akçakaya M, Moeller S, Weingärtner S, Uğurbil K. Scan-specific robust artificial-neural-networks for k-space interpolation (RAKI) reconstruction: Database-free deep learning for fast imaging. Magn Reson Med. 2019 Jan;81(1):439-453. doi: 10.1002/mrm.27420. Epub 2018 Sep 18. PMID: 30277269; PMCID: PMC6258345.
+
+\bibitem{admm}
+Yang, Yan, Sun, Jian, Li, Huibin, and Xu, Zongben.
+\newblock Deep {ADMM-Net} for compressive sensing {MRI}.
+\newblock In \emph{Proceedings of the 30th International Conference on Neural Information Processing Systems}, pages 10–18, Barcelona, Spain, 2016. Curran Associates Inc.
+
+\bibitem{modl}
+Fessler JA. MODEL-BASED IMAGE RECONSTRUCTION FOR MRI. IEEE Signal Process Mag. 2010 Jul 1;27(4):81-89. doi: 10.1109/MSP.2010.936726. PMID: 21135916; PMCID: PMC2996730.
+
+\bibitem{varnet}
+Hammernik K, Klatzer T, Kobler E, Recht MP, Sodickson DK, Pock T, Knoll F. Learning a variational network for reconstruction of accelerated MRI data. Magn Reson Med. 2018 Jun;79(6):3055-3071. doi: 10.1002/mrm.26977. Epub 2017 Nov 8. PMID: 29115689; PMCID: PMC5902683.
+
+ 
+\bibitem{e2evarnet} A. Sriram et al., "End-to-End Variational Networks for Accelerated MRI Reconstruction," in Medical Image Computing and Computer Assisted Intervention -- MICCAI 2020, Lecture Notes in Computer Science, vol. 12262, Springer, Cham, 2020, pp. 64--73. DOI: 10.1007/978-3-030-59713-9\_7
+
+
+\bibitem{scorediff}
+Chung H, Ye JC. Score-based diffusion models for accelerated MRI. Med Image Anal. 2022 Aug;80:102479. doi: 10.1016/j.media.2022.102479. Epub 2022 May 13. PMID: 35696876.
+
+\bibitem{flowmatch}
+Daikun Zhang, Qiuyi Han, Yuzhu Xiong, Hongwei Du,
+Mutli-modal straight flow matching for accelerated MR imaging,
+Computers in Biology and Medicine,
+Volume 178,
+2024,
+108668,
+ISSN 0010-4825,
+https://doi.org/10.1016/j.compbiomed.2024.108668.
+
+\bibitem{fastmri}
+J. Zbontar, F. Knoll, A. Sriram, T. Murrell, Z. Huang, M. J. Muckley, A. Defazio, R. Stern, P. Johnson, M. Bruno, M. Parente, K. J. Geras, J. Katsnelson, H. Chandarana, Z. Zhang, M. Drozdzal, A. Romero, M. Rabbat, P. Vincent, N. Yakubova, J. Pinkerton, D. Wang, E. Owens, C. L. Zitnick, M. P. Recht, D. K. Sodickson, and Y. W. Lui, ``fastMRI: An Open Dataset and Benchmarks for Accelerated MRI,'' \textit{ArXiv e-prints}, 2018, arXiv:1811.08839.
+
+\bibitem{m4raw}
+Lyu, M., Mei, L., Huang, S. et al. M4Raw: A multi-contrast, multi-repetition, multi-channel MRI k-space dataset for low-field MRI research. Sci Data 10, 264 (2023). https://doi.org/10.1038/s41597-023-02181-4
+
+\bibitem{cs}
+M. Lustig, D. L. Donoho, J. M. Santos and J. M. Pauly, "Compressed Sensing MRI," in IEEE Signal Processing Magazine, vol. 25, no. 2, pp. 72-82, March 2008, doi: 10.1109/MSP.2007.914728.
+keywords: {Compressed sensing;Magnetic resonance imaging;Magnetization;Image reconstruction;Image coding;Protons;Radio frequency;Encoding;Biomedical imaging;Wavelet transforms}
+
+\bibitem{loraks}
+Haldar JP. Low-rank modeling of local k-space neighborhoods (LORAKS) for constrained MRI. IEEE Trans Med Imaging. 2014 Mar;33(3):668-81. doi: 10.1109/TMI.2013.2293974. PMID: 24595341; PMCID: PMC4122573.
+
+\bibitem{unet}
+Ronneberger, Olaf et al. “U-Net: Convolutional Networks for Biomedical Image Segmentation.” ArXiv abs/1505.04597 (2015): n. pag.
+
+\bibitem{oucr}
+Pengfei Guo, Jeya Maria Jose Valanarasu, Puyang Wang, Jinyuan Zhou, Shanshan Jiang, and Vishal M. Patel. 2021. Over-and-Under Complete Convolutional RNN for MRI Reconstruction. In Medical Image Computing and Computer Assisted Intervention – MICCAI 2021: 24th International Conference, Strasbourg, France, September 27–October 1, 2021, Proceedings, Part VI. Springer-Verlag, Berlin, Heidelberg, 13–23. https://doi.org/10.1007/978-3-030-87231-1\_2
+
+\bibitem{diffrecon}
+Peng, C., Guo, P., Zhou, S.K., Patel, V.M., Chellappa, R. (2022). Towards Performant and Reliable Undersampled MR Reconstruction via Diffusion Model Sampling. In: Wang, L., Dou, Q., Fletcher, P.T., Speidel, S., Li, S. (eds) Medical Image Computing and Computer Assisted Intervention – MICCAI 2022. MICCAI 2022. Lecture Notes in Computer Science, vol 13436. Springer, Cham. https://doi.org/10.1007/978-3-031-16446-0\_59
+
+\bibitem{tcdiffrecon}
+C. Zhang, Y. Chen, Z. Fan, Y. Huang, W. Weng, R. Ge, D. Zeng, and C. Wang, ``TC-DiffRecon: Texture Coordination MRI Reconstruction Method Based on Diffusion Model and Modified MF-UNet Method,'' in \textit{Proceedings of the IEEE International Symposium on Biomedical Imaging (ISBI)}, pp. 1-5, May 2024, doi: 10.1109/ISBI56570.2024.10635308.
+
+\bibitem{hfssde}
+C. Cao et al., "High-Frequency Space Diffusion Model for Accelerated MRI," in IEEE Transactions on Medical Imaging, vol. 43, no. 5, pp. 1853-1865, May 2024, doi: 10.1109/TMI.2024.3351702.
+keywords: {Image reconstruction;Diffusion processes;Convergence;Mathematical models;Magnetic resonance imaging;Perturbation methods;Kernel;Diffusion models;MRI;image reconstruction;inverse problem},
+
+\bibitem{transmed}
+Dai, Y.; Gao, Y.; Liu, F. TransMed: Transformers Advance Multi-Modal Medical Image Classification. Diagnostics 2021, 11, 1384. https://doi.org/10.3390/diagnostics11081384
+
+\bibitem{rsgan}
+S. U. H. Dar, M. Yurt, M. Shahdloo, M. E. Ildız, B. Tınaz and T. Çukur, "Prior-Guided Image Reconstruction for Accelerated Multi-Contrast MRI via Generative Adversarial Networks," in IEEE Journal of Selected Topics in Signal Processing, vol. 14, no. 6, pp. 1072-1087, Oct. 2020, doi: 10.1109/JSTSP.2020.3001737.
+keywords: {Image reconstruction;Magnetic resonance imaging;Generative adversarial networks;Neural networks;Generative adversarial network (GAN);synthesis;reconstruction;multi contrast;magnetic resonance imaging (MRI);prior}
+
+\bibitem{mtrans}
+C. -M. Feng et al., "Multimodal Transformer for Accelerated MR Imaging," in IEEE Transactions on Medical Imaging, vol. 42, no. 10, pp. 2804-2816, Oct. 2023, doi: 10.1109/TMI.2022.3180228.
+keywords: {Imaging;Transformers;Image reconstruction;Task analysis;Deep learning;Magnetic resonance imaging;Electronic mail;MR imaging;multi-modal;reconstruction;super-resolution}
+
+\bibitem{dudornet}
+B. Zhou and S. K. Zhou, "DuDoRNet: Learning a Dual-Domain Recurrent Network for Fast MRI Reconstruction with Deep T1 Prior", in \textit{Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition}, pp. 4273--4282, 2020.
+
+
+\end{thebibliography}
+
+\end{document}

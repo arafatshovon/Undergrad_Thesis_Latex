@@ -1,0 +1,123 @@
+\relax 
+\citation{sense}
+\citation{grappa}
+\citation{dagan}
+\citation{errn}
+\citation{deepcomplex}
+\citation{refinegan}
+\citation{raki}
+\citation{admm}
+\citation{modl}
+\citation{varnet}
+\citation{e2evarnet}
+\citation{scorediff}
+\citation{flowmatch}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{}\protected@file@percent }
+\newlabel{sec:introduction}{{I}{1}{}{section.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Problem Formulation}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Proposed Model Architecture}{2}{}\protected@file@percent }
+\citation{fastmri}
+\citation{m4raw}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Wavelet Based UNET}}{3}{}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{•}{{1}{3}{}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Model Architecture}}{3}{}\protected@file@percent }
+\newlabel{•}{{2}{3}{}{figure.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Dataset}{3}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces  Training \& Validation volumes from fastMRI and M4Raw}}{3}{}\protected@file@percent }
+\newlabel{tab:dataset_info}{{I}{3}{}{table.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Refinement Block}}{4}{}\protected@file@percent }
+\newlabel{•}{{3}{4}{}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Sensitivity Estimation Block}}{4}{}\protected@file@percent }
+\newlabel{•}{{4}{4}{}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Data Consistency Block}}{4}{}\protected@file@percent }
+\newlabel{•}{{5}{4}{}{figure.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Methodology}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {V-A}Data Preprocessing}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {V-B}Training Strategy}{5}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Illustration of the undersampling process in MRI reconstruction. The fully sampled k-space data is undersampled to accelerate acquisition.}}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {V-C}Loss Function}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {V-C.1}L1 \& L2 Norm}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {V-C.2}SSIM\_Loss}{5}{}\protected@file@percent }
+\citation{cs}
+\citation{loraks}
+\citation{unet}
+\citation{oucr}
+\citation{diffrecon}
+\citation{tcdiffrecon}
+\citation{hfssde}
+\citation{flowmatch}
+\citation{transmed}
+\citation{rsgan}
+\citation{mtrans}
+\citation{fastmri}
+\citation{dudornet}
+\citation{scorediff}
+\citation{fastmri}
+\citation{varnet}
+\citation{scorediff}
+\citation{grappa}
+\citation{varnet}
+\citation{grappa}
+\citation{varnet}
+\citation{grappa}
+\citation{varnet}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {V-C.3}Phase\_Loss}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {V-D}Evaluation Metrics}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {V-D.1}PSNR}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {V-D.2}SSIM}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Results}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {VI-A}Dataset: fastMRI}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {VI-A.1}Ours vs. Traditional CNN}{6}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Comparison of different methods with SSIM and PSNR metrics at Acceleration Factor(AF) = 4}}{6}{}\protected@file@percent }
+\newlabel{tab:method-comparison}{{II}{6}{}{table.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {VI-A.2}Ours vs. SOTA}{6}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces fastMRI: Knee Single-Coil}}{6}{}\protected@file@percent }
+\newlabel{tab:fastmri-knee-single}{{III}{6}{}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces fastMRI: Knee Multi-Coil}}{6}{}\protected@file@percent }
+\newlabel{tab:fastmri-knee-multi}{{IV}{6}{}{table.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {VI-B}Dataset: M4Raw}{7}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces M4Raw: Brain Multi-Coil}}{7}{}\protected@file@percent }
+\newlabel{tab:M4Raw-comparison}{{V}{7}{}{table.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Ablation Study:Impact of Key Components}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {VII-A}Effect of the Data Consistency Block}{7}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Performance comparison with and without the Data Consistency (DC) block.}}{7}{}\protected@file@percent }
+\newlabel{tab:dc_block}{{VI}{7}{}{table.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {VII-B}Effect of Wavelet-based UNET in the Refinement Block}{7}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Performance comparison between UNET and Wavelet-based UNET (W-UNET) in the Refinement Block.}}{7}{}\protected@file@percent }
+\newlabel{tab:wcnn_vs_unet}{{VII}{7}{}{table.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {VII-C}Summary of Findings}{7}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Illustrative Comparison of fastMRI knee Single-Coil MRI Reconstruction (x4 Acceleration Factor)}}{8}{}\protected@file@percent }
+\newlabel{•}{{7}{8}{}{figure.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Illustrative Comparison of fastMRI knee Single-Coil MRI Reconstruction (x4 Acceleration Factor)}}{9}{}\protected@file@percent }
+\newlabel{•}{{8}{9}{}{figure.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Illustrative Comparison of fastMRI knee Single-Coil MRI Reconstruction (x4 Acceleration Factor)}}{10}{}\protected@file@percent }
+\newlabel{•}{{9}{10}{}{figure.9}{}}
+\bibcite{sense}{1}
+\bibcite{grappa}{2}
+\bibcite{dagan}{3}
+\bibcite{errn}{4}
+\bibcite{deepcomplex}{5}
+\bibcite{refinegan}{6}
+\bibcite{raki}{7}
+\bibcite{admm}{8}
+\bibcite{modl}{9}
+\bibcite{varnet}{10}
+\bibcite{e2evarnet}{11}
+\bibcite{scorediff}{12}
+\bibcite{flowmatch}{13}
+\bibcite{fastmri}{14}
+\bibcite{m4raw}{15}
+\bibcite{cs}{16}
+\bibcite{loraks}{17}
+\bibcite{unet}{18}
+\bibcite{oucr}{19}
+\bibcite{diffrecon}{20}
+\bibcite{tcdiffrecon}{21}
+\bibcite{hfssde}{22}
+\bibcite{transmed}{23}
+\bibcite{rsgan}{24}
+\bibcite{mtrans}{25}
+\bibcite{dudornet}{26}
+\@writefile{toc}{\contentsline {section}{References}{11}{}\protected@file@percent }
+\gdef \@abspage@last{11}
