@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.1) (preloaded format=pdflatex 2026.2.2)  2 FEB 2026 16:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.1) (preloaded format=pdflatex 2026.2.2)  3 FEB 2026 11:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -548,11 +548,11 @@ File: figures/WCNN.png Graphic file (type png)
 <use figures/WCNN.png>
 Package pdftex.def Info: figures/WCNN.png  used on input line 108.
 (pdftex.def)             Requested size: 516.0pt x 210.25906pt.
-<figures/Model.png, id=16, 2828.5675pt x 1045.9075pt>
+<figures/Model.png, id=16, 2828.5675pt x 1044.90375pt>
 File: figures/Model.png Graphic file (type png)
 <use figures/Model.png>
 Package pdftex.def Info: figures/Model.png  used on input line 116.
-(pdftex.def)             Requested size: 516.0pt x 190.79274pt.
+(pdftex.def)             Requested size: 516.0pt x 190.60963pt.
 <figures/Refinement.png, id=17, 2153.04375pt x 977.6525pt>
 File: figures/Refinement.png Graphic file (type png)
 <use figures/Refinement.png>
@@ -563,11 +563,11 @@ File: figures/SME.png Graphic file (type png)
 <use figures/SME.png>
 Package pdftex.def Info: figures/SME.png  used on input line 130.
 (pdftex.def)             Requested size: 516.0pt x 141.65466pt.
-<figures/DC.png, id=19, 661.47125pt x 221.82875pt>
+<figures/DC.png, id=19, 710.655pt x 221.82875pt>
 File: figures/DC.png Graphic file (type png)
 <use figures/DC.png>
 Package pdftex.def Info: figures/DC.png  used on input line 138.
-(pdftex.def)             Requested size: 252.0pt x 84.50903pt.
+(pdftex.def)             Requested size: 252.0pt x 78.66005pt.
 
 Underfull \hbox (badness 10000) in paragraph at lines 143--144
 
@@ -805,7 +805,7 @@ LaTeX Warning: There were multiply-defined labels.
 Here is how much of TeX's memory you used:
  5482 strings out of 467867
  90085 string characters out of 5425599
- 530625 words of memory out of 5000000
+ 530631 words of memory out of 5000000
  34286 multiletter control sequences out of 15000+600000
  691060 words of font info for 141 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -826,7 +826,7 @@ re/miktex-texmf/fonts/type1/urw/helvetic/uhvro8a.pfb></usr/local/share/miktex-t
 exmf/fonts/type1/urw/times/utmb8a.pfb></usr/local/share/miktex-texmf/fonts/type
 1/urw/times/utmr8a.pfb></usr/local/share/miktex-texmf/fonts/type1/urw/times/utm
 ri8a.pfb>
-Output written on tmi.pdf (11 pages, 7118641 bytes).
+Output written on tmi.pdf (11 pages, 7136093 bytes).
 PDF statistics:
  146 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
